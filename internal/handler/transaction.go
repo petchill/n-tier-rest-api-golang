@@ -24,6 +24,7 @@ func (h transactionHandler) WithdrawHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	withdrawPayload := mHandler.WithdrawReqBody{}
+	// bind req body to WithdrawReqBody struct
 	err := json.NewDecoder(r.Body).Decode(&withdrawPayload)
 	if err != nil {
 		http.Error(w, "Some request information are missing.", http.StatusBadRequest)
@@ -31,10 +32,11 @@ func (h transactionHandler) WithdrawHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if bodyValidateErr := validateRequestBody(withdrawPayload); bodyValidateErr != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, bodyValidateErr.Error(), http.StatusBadRequest)
 		return
 	}
 
+	// call service function
 	reply, err := h.transactionService.Withdraw(r.Context(), withdrawPayload)
 	if err != nil {
 		errMsg := fmt.Sprintf("Withdraw process is fail because of %s", err.Error())
@@ -43,22 +45,22 @@ func (h transactionHandler) WithdrawHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	replyMsg := fmt.Sprintf("%s withdraw money %v baht from account %s success. Remained %v baht.", reply.UserName, reply.WithdrawAmount, reply.AccountID, reply.RemainAmount)
+	// reply message to client
 	fmt.Fprintf(w, replyMsg)
 	return
 }
 
 func validateRequestBody(withdrawPayload mHandler.WithdrawReqBody) error {
 	if nameValid := validateEnglishName(withdrawPayload.Withdrawer); !nameValid {
-		return errors.New("Withdrawers' name must be English name.")
+		return errors.New("withdrawer must be English name and in format (fisrtname surname).")
 	}
 
 	if accountIDValid := validateAccountID(withdrawPayload.AccountID); !accountIDValid {
-		return errors.New("Account ID must be number with 8 length.")
-
+		return errors.New("account_id must be number with 8 length.")
 	}
 
-	if amountValid := validateAccountID(withdrawPayload.AccountID); !amountValid {
-		return errors.New("Withdraw amount must be more than 0.")
+	if amountValid := validateAmount(withdrawPayload.Amount); !amountValid {
+		return errors.New("withdraw_amount must be more than 0.")
 	}
 
 	return nil

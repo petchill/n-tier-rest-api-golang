@@ -23,9 +23,9 @@ func (r userRepository) GetUserByID(ctx context.Context, id int) (mUser.User, er
 	err := collection.FindOne(ctx, query).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return user, errors.New("ไม่พบผู้ใช้ในระบบ")
+			return user, errors.New("Cannot find User by this id.")
 		}
-		return user, errors.New("การค้นหาผู้ใช้ผิดพลาด")
+		return user, errors.New("Cannot find User, something wrong.")
 	}
 	return user, nil
 }

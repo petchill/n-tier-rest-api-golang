@@ -36,7 +36,9 @@ func (r accountRepository) UpdateRemainAmountByID(ctx context.Context, id string
 
 	query := bson.M{"id": id}
 	payload := bson.M{
-		"remain_amount": remainAmount,
+		"$set": bson.M{
+			"remain_amount": remainAmount,
+		},
 	}
 	err := collection.FindOneAndUpdate(ctx, query, payload).Err()
 

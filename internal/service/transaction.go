@@ -19,10 +19,12 @@ type transactionService struct {
 
 // Withdraw implements service.TransactionService
 func (s transactionService) Withdraw(ctx context.Context, payload mHandler.WithdrawReqBody) (mRes.WithdrawReply, error) {
+	// Get Account from repository
 	account, err := s.accountRepo.GetAccountByID(ctx, payload.AccountID)
 	if err != nil {
 		return mRes.WithdrawReply{}, err
 	}
+	// Get User from repository
 	user, err := s.userRepo.GetUserByID(ctx, account.UserID)
 	if err != nil {
 		return mRes.WithdrawReply{}, err
@@ -62,7 +64,7 @@ func (s transactionService) Withdraw(ctx context.Context, payload mHandler.Withd
 }
 
 func validateAccount(account mAccount.Account) bool {
-	return account.AccountAvailable
+	return account.IsAvailable
 }
 
 func validateWithdrawAmount(account mAccount.Account, amount float64) bool {
